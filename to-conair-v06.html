@@ -1,0 +1,210 @@
+
+<!DOCTYPE html>
+
+<!-- Updates & Notes
+     
+     Ben changes 11/2: Created two new div classes, rightcolumn and left column. Added <hr> on line 188 that way if there is no date there will still be a notepad line since divs are now split. Also added in seperate getElementById sequences for the two div columns in lines 188-192. Lastly, on line 195 I altered the 'Due By' becuase this was causing the date output to wrap onto a new and mess with the split div formatting, so I shortened it. We can mess with this, but for now it works as is. Also changed the font of the Conair tag and our names, could not see them in grey haha.
+     
+     Bugs created (always happens :D): The button no longer appears next to the tasks, but since we are changing how this function works I dont think this will be that big of a deal. 
+     
+     Heydar Changes ( 11/7 ):
+     \_ Changed due date visuals
+     \_\ Added an array sorting system resembling to LIFO data structures.
+     
+-->
+
+<html>
+<head>
+     <link rel="preconnect" href="https://fonts.googleapis.com">
+     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+     <link href="https://fonts.googleapis.com/css2?family=Monoton&display=swap" rel="stylesheet">
+     <style>
+          
+          /* DESIGNS */
+          .center {
+               border: none;
+               color: white;
+               padding: 15px 15px;
+               text-align: center;
+               text-decoration: none;
+               font-size: 16px;
+               margin: 4px 2px;
+          }
+          #task {
+               box-shadow: 3px 2px 22px 1px rgba(146, 121, 121, 0.24); 
+               background-color: ghostwhite;
+          }
+          #dateMonth {box-shadow: 3px 2px 22px 1px rgba(175, 161, 161, 0.24); background-color: ghostwhite;}
+          #dateDay {box-shadow: 3px 2px 22px 1px rgba(175, 161, 161, 0.24); background-color: ghostwhite;}
+          
+          body {
+               background-color: ghostwhite;
+               color: black;
+               font-size: 200%;
+               background: linear-gradient(0.25turn, #345269, #00A699);
+          }
+          section {
+               display: block;
+          }
+          input[type=text] {
+               width: 39%;
+               padding: 12px 20px;
+               margin: 8px 0;
+               box-sizing: border-box;
+               border: black;
+               background-color: white;
+               border-radius: 15px;
+               text-align: center;
+          }
+          #userButton {
+               background-color: #2D5D6F;
+               border: none;
+               color: white;
+               width: 10%;
+               padding: 15px 32px;
+               text-decoration: none;
+               display: inline-block;
+               text-align: center;
+               font-size: 16px;
+               margin-top: 3.2%;
+               margin-bottom: -1%;
+               box-shadow: 5px 10px 22px 1px rgba(0, 0, 0, 0.3);
+               outline: none;
+               border-radius: 15px;
+               transition: 0.01s;
+          }
+          
+          #userButton:hover {
+               background-color: #345269;
+               transition: 0.3s;
+          }
+          #userButton:not(:hover) {
+               transition: 0.3s;
+          }
+          #userButton:active {
+               box-shadow: 3px 2px 22px 1px rgba(0, 0, 0, 0.24);
+          }
+          #userButton:focus {transition: 0.1s;}
+          #outputDiv {
+               background-color: ghostwhite;
+               border-radius: 15px 15px 15px;
+               padding: 3.1415%;
+               margin: 0 auto 5% auto;
+               font-size: 50%;
+               font-family: Arial,Helvetica, sans-serif;
+               width: 40%;
+               word-wrap: break-word;
+               box-shadow:
+               27.6px 27.4px 76.4px rgba(0, 0, 0, 0.069),
+               45.9px 45.5px 101.4px rgba(0, 0, 0, 0.098),
+               101px 100px 130px rgba(0, 0, 0, 0.16);
+               overflow: hidden;
+          }
+          #clearButton {
+               background-color: #2D5D6F;
+               border: none;
+               color: white;
+               width: 7%;
+               padding: 15px 32px;
+               text-decoration: none;
+               display: inline-block;
+               text-align: center;
+               font-size: 16px;
+               margin-bottom: 3.2%;
+               box-shadow: 5px 10px 22px 1px rgba(0, 0, 0, 0.3);
+               outline: none;
+               border-radius: 15px;
+               transition: 0.01s;
+               
+          }
+          a { 
+               color:black;
+               text-decoration:none;
+               font-size: 120%;
+          }
+          #leftcolumn {
+               width: 100%;
+               background: ghostwhite;
+               display: inline-block;
+               font-size: 80%;
+               font-family: Arial,Helvetica, sans-serif;
+          }
+          #taskButton {
+               background-color: antiquewhite;
+               outline: none;
+               margin-right: 2%;
+               margin-left: 1%;
+               border-radius: 5px;
+               border: none;
+               width: 2%;
+               padding-top: 0.4%;
+          }
+          #taskButton:hover {
+               background-color: lightgray;
+          }
+          .thingElement:hover {
+               border-radius: 15px;
+               padding: 0%;
+               transition: 1;
+          }
+     </style>
+     <script type="text/javascript" src="http://balance3e.com/time.js">
+     </script>
+     <script type="text/javascript">
+          
+          var things = [];
+          var count = 0;
+          function clearList() {
+               things = [];
+               document.getElementById('leftcolumn').innerHTML = "";
+               count = 0;
+          }
+          function removeFrom(index) {
+               var checkString = "removeFrom(" + index + ")";
+               
+               for (var i = 0; i < things.length; i++) {
+                    if (things[i].includes(checkString)) {
+                         things.splice(i, 1);
+                         break;
+                    }
+               }
+               document.getElementById('leftcolumn').innerHTML = "";
+               for (var i = 0; i < things.length; i++) {
+                    document.getElementById('leftcolumn').innerHTML += things[i];
+               }
+               count--;
+               if (count < 0) { count = 0 }
+          }
+          /* SECOND VERSION */
+          function additiveButton(todo) {
+               document.getElementById('leftcolumn').innerHTML = "";
+               things.push('<p class="thingElement" style="cursor: pointer;" onclick="removeFrom(' + count + ')"> ⋙ \t' + todo + '</p><hr>');     
+               for (var i = 0; i < things.length; i++) {
+                    document.getElementById('leftcolumn').innerHTML += things[i];
+               }
+               count++;
+               document.getElementById('task').value = "";
+          }
+     </script>
+     <title>To-Conair</title>
+</head>
+<body>
+     <div style="margin: 5%; text-align: center;">
+          <span style="font-size: 125%; font-family: 'Monoton', cursive;"><font color="black"> ⥤ &nbsp; To-Do &nbsp; List &nbsp;  ⥢ </font></span> <br>
+          <span style="font-size: 70%; font-family: 'Courier New', monospace;"><font color="black">by Coniar LLC</font></span><br>
+          <font color="black"  size="2%">© Heydar, Ben, Vinh, Marcela</font>
+     </div>
+     <div style="text-align: center;">
+          <input type="text" id="task" style="width: 36%; padding: 1%" height="15%" placeholder="Enter your task here...">
+     </div>
+     <div class="center">
+          <button id="userButton" onclick="additiveButton( document.getElementById('task').value);" >Click for List</button>
+     </div>
+     <div class="center">
+          <button id="clearButton" onclick="clearList();">Clear</button>
+     </div>
+     <div class="list" id="outputDiv" style="font-weight: bold; font-size: 70%;">
+          <div id="leftcolumn"></div>
+     </div>
+</body>
+</html>
